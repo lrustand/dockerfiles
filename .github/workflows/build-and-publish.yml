@@ -1,16 +1,13 @@
-#
-name: Create and publish a Docker image
+name: Create and publish Docker images
 
-# Configures this workflow to run every time a change is pushed to the branch called `release`.
 on:
   push:
     branches: ['release']
 
-# Defines two custom environment variables for the workflow. These are used for the Container registry domain, and a name for the Docker image that this workflow builds.
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   USERNAME: ${{ github.actor }}
+  OWNER: ${{ github.repository_owner }}
 
 jobs:
   build-and-push:
@@ -31,9 +28,4 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker images
-      run: |
-        for dockerfile in *.Dockerfile; do
-          image_name=$(basename "$dockerfile" .Dockerfile)
-          docker build -t ${{ env.REGISTRY }}/${{ github.repository_owner }}/${image_name}:latest -f "$dockerfile" .
-          docker push ${{ env.REGISTRY }}/${{ github.repository_owner }}/${image_name}:latest
-        done
+      run: ./build-and-push.sh
